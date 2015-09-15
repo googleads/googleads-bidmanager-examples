@@ -10,7 +10,7 @@ available from <https://developers.google.com/bid-manager/>.
 
 ##Announcements and updates
 
-For API and client library updates and news, please follow our Google Ads 
+For API and client library updates and news, please follow our Google Ads
 Developers blog: <http://googleadsdeveloper.blogspot.com/>.
 
 ## Running the examples
@@ -20,10 +20,10 @@ Developers blog: <http://googleadsdeveloper.blogspot.com/>.
 To download the contents of the repository, you can use the command
 
 ```
-git clone https://github.com/googleads/googleads-dbm-examples
+git clone https://github.com/googleads/googleads-bidmanager-examples
 ```
 
-or browse to <https://github.com/googleads/googleads-dbm-examples> and
+or browse to <https://github.com/googleads/googleads-bidmanager-examples> and
  download a zip.
 
 ###Authorization Setup
@@ -40,6 +40,9 @@ The API uses OAuth2 for security.
  * copy this file to src/main/resources/client_secrets.json.
 
 ##Setup the environment##
+### Set the Application name ###
+Edit ```SecurityUtilities.java``` and change **APPLICATION_NAME**
+
 ### Via the command line ###
 
 1. Execute the following command:

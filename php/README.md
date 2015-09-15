@@ -20,10 +20,10 @@ Developers blog: <http://googleadsdeveloper.blogspot.com/>.
 To download the contents of the repository, you can use the command
 
 ```
-git clone https://github.com/googleads/googleads-dbm-examples
+git clone https://github.com/googleads/googleads-bidmanager-examples
 ```
 
-or browse to <https://github.com/googleads/googleads-dbm-examples> and
+or browse to <https://github.com/googleads/googleads-bidmanager-examples> and
  download a zip.
 
 ###Authorization Setup
