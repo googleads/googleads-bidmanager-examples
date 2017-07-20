@@ -62,13 +62,13 @@ class GetLatestReport extends BaseExample {
       }
     } else {
       // Call the API, getting the latest status for the passed queryId.
-      $result = $this->service->queries->getquery($queryId);
+      $query = $this->service->queries->getquery($queryId);
 
-      if ($result->metadata->latestReportRunTimeMs > microtime(true) * 1000 -
+      if ($query->metadata->latestReportRunTimeMs > microtime(true) * 1000 -
           self::CURRENT_REPORT_WINDOW_MS) {
         // Grab the report.
-        file_put_contents($result->queryId . '.csv',
-            fopen($result->metadata->googleCloudStoragePathForLatestReport,
+        file_put_contents($query->queryId . '.csv',
+            fopen($query->metadata->googleCloudStoragePathForLatestReport,
                 'r'));
         print '<p>Download complete.</p>';
       } else {

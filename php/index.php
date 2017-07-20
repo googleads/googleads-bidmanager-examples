@@ -20,15 +20,8 @@
  * DoubleClickBid Manager REST API samples to run.
  *
  */
-
-/*
- * Provide path to src directory of google-api-php-client.
- *
- * For example:"google-api-php-client/src/"
- */
-set_include_path('<PATH_TO_PHP_CLIENT>' . PATH_SEPARATOR . get_include_path());
-require_once 'Google/autoload.php';
-require_once "htmlHelper.php";
+require_once __DIR__ . '/vendor/autoload.php';
+require_once 'htmlHelper.php';
 
 session_start();
 
@@ -64,7 +57,7 @@ if (isset($_GET['code'])) {
   // tokens, assuming both are available.
   $_SESSION['access_token'] = $client->getAccessToken();
   if (STORE_ON_DISK) {
-    file_put_contents(TOKEN_FILENAME, $_SESSION['access_token']);
+    file_put_contents(TOKEN_FILENAME, json_encode($_SESSION['access_token']));
   }
   $redirect = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
   header('Location: ' . filter_var($redirect, FILTER_SANITIZE_URL));

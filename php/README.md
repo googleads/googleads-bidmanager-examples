@@ -1,52 +1,41 @@
-#DoubleClick Bid Manager REST API PHP Samples
-These samples demonstrate basic usage of the DoubleClick Bid Manager REST API.
+# DoubleClick Bid Manager API PHP Samples
 
-The complete documentation for the DoubleClick Bid Manager API is
-available from <https://developers.google.com/bid-manager/>.
+This is a collection of samples written in PHP which provide a starting place
+for your experimentation into the DoubleClick Bid Manager API.
 
-##Prerequisites
-- [`PHP 5.2.1+`](http://php.net/)
-- [`PHP Client library for Google APIs`](https://developers.google.com/api-client-library/php/start/installation)
+## Prerequisites
 
-##Announcements and updates
+  - PHP 5.4+
+  - JSON PHP extension
+  - Composer
 
-For API and client library updates and news, please follow our Google Ads 
-Developers blog: <http://googleadsdeveloper.blogspot.com/>.
+From the example directory, run `composer install` to install all dependencies.
 
-## Running the examples
+## Setup Authentication
 
-###Download the repository contents
+This API uses OAuth 2.0. Learn more about Google APIs and OAuth 2.0 here:
+https://developers.google.com/accounts/docs/OAuth2
 
-To download the contents of the repository, you can use the command
+Or, if you'd like to dive right in, follow these steps.
+ - Visit https://console.developers.google.com to register your application.
+ - From the API Manager -> Overview screen, activate access to "DoubleClick Bid Manager API".
+ - Click on "Credentials" in the left navigation menu
+ - Click the button labeled "Create credentials" ->  "OAuth2 client ID"
+ - Select "Web Application" as the "Application type"
+ - Configure javascript origins and redirect URIs
+   - Authorized Javascript Origins: http://localhost
+   - Authorized Redirect URIs: http://localhost/path/to/index.php
+ - Click "Create client ID"
+ - Click "Download JSON" and save the file as `client_secrets.json` in your
+   examples directory
 
-```
-git clone https://github.com/googleads/googleads-bidmanager-examples
-```
+> #### Security alert!
 
-or browse to <https://github.com/googleads/googleads-bidmanager-examples> and
- download a zip.
-
-###Authorization Setup
-The API uses OAuth2 for security
-
- * Launch the [Google Developers Console](https://console.developers.google.com)
- * select a project
- * click **APIs & auth**
- * click the **Credentials** tab
- * if you need to create a  ```Web client``` under ```OAuth 2.0 client IDs```
-  * click **Create a new client ID**
-  * select **Web Application**
-  * ensure the **Authorized redirect URIs** is set to the path containing ```index.php```
-    e.g. http://your/path/
- * if you have an existing ```Web client```
-  * ensure the **Authorized redirect URIs** is set to the path containing ```index.php```
-    e.g. http://your/path/
- * Click **Download JSON** for a ```Web Client```
- * place the file, renamed as client_secrets.json file in the same directory as ```index.php```
+> Always ensure that your client_secrets.json file is not publicly accessible.
+> This file contains credential information which could allow unauthorized access
+> to your DBM data.
 
 ## Running the Examples
-
-Change the include path in ```index.php``` to your client library installation (Replace ```<PATH_TO_PHP_CLIENT>```)
 
 Open the sample (http://your/path/index.php) in your browser
 
