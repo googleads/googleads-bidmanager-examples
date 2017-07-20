@@ -26,6 +26,7 @@ this will print a list of existing queries.
 """
 
 import argparse
+from contextlib import closing
 from datetime import datetime
 from datetime import timedelta
 import os
@@ -57,25 +58,31 @@ parser.add_argument('--report_window', default=12, type=int,
 def main(doubleclick_bid_manager, output_dir, query_id, report_window):
   if query_id:
     # Call the API, getting the latest status for the passed queryId.
-    response = (doubleclick_bid_manager.queries().getquery(queryId=query_id)
+    query = (doubleclick_bid_manager.queries().getquery(queryId=query_id)
                 .execute())
     try:
       # If it is recent enough...
-      if (is_in_report_window(response['metadata']['latestReportRunTimeMs'],
+      if (is_in_report_window(query['metadata']['latestReportRunTimeMs'],
                               report_window)):
+        if not os.path.isabs(output_dir):
+          output_dir = os.path.expanduser(output_dir)
+
         # Grab the report and write contents to a file.
-        save_report_to_file(output_dir, response['queryId'],
-                            (response['metadata']
-                             ['googleCloudStoragePathForLatestReport']))
+        report_url = query['metadata']['googleCloudStoragePathForLatestReport']
+        output_file = '%s/%s.csv' % (output_dir, query['queryId'])
+        with open(output_file, 'wb') as output:
+          with closing(urllib2.urlopen(report_url)) as url:
+            output.write(url.read())
         print 'Download complete.'
       else:
         print('No reports for queryId "%s" in the last %s hours.' %
-              (response['queryId'], report_window))
+              (query['queryId'], report_window))
     except KeyError:
-      print'No report found for queryId "%s".' % query_id
+      print 'No report found for queryId "%s".' % query_id
   else:
     # Call the API, getting a list of queries.
     response = doubleclick_bid_manager.queries().listqueries().execute()
+
     # Print queries out.
     print 'Id\t\tName'
     if 'queries' in response:
@@ -98,22 +105,6 @@ def is_in_report_window(run_time_ms, report_window):
   report_time = datetime.fromtimestamp(int((run_time_ms))/1000)
   earliest_time_in_range = datetime.now() - timedelta(hours=report_window)
   return report_time > earliest_time_in_range
-
-
-def save_report_to_file(output_dir, query_id, report_url):
-  """Saves the contents of the report_url to the given output directory.
-
-  Args:
-    output_dir: str containing the path to the directory you want to save to.
-    query_id: str containing the Id of the query that generated the report.
-    report_url: str containing the url to the generated report.
-  """
-  # Create formatter for output file path.
-  if not os.path.isabs(output_dir):
-    output_dir = os.path.expanduser(output_dir)
-  output_fmt = output_dir + '/%s.csv'
-  with(open(output_fmt % query_id, 'wb')) as handle:
-    handle.write(urllib2.urlopen(report_url).read())
 
 
 if __name__ == '__main__':
