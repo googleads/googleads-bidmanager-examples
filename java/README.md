@@ -1,21 +1,21 @@
-#DoubleClick Bid Manager API Java Samples
+# DoubleClick Bid Manager API Java Samples
 These samples demonstrate basic usage of the DoubleClick Bid Manager REST API.
 
 The complete documentation for the DoubleClick Bid Manager API is
 available from <https://developers.google.com/bid-manager/>.
 
-##Prerequisites
+## Prerequisites
 - [`Java 7+`](http://java.com)
 - [`Maven`](http://maven.apache.org)
 
-##Announcements and updates
+## Announcements and updates
 
 For API and client library updates and news, please follow our Google Ads
 Developers blog: <http://googleadsdeveloper.blogspot.com/>.
 
 ## Running the examples
 
-###Download the repository contents
+### Download the repository contents
 
 To download the contents of the repository, you can use the command
 
@@ -26,7 +26,7 @@ git clone https://github.com/googleads/googleads-bidmanager-examples
 or browse to <https://github.com/googleads/googleads-bidmanager-examples> and
  download a zip.
 
-###Authorization Setup
+### Authorization Setup
 The API uses OAuth2 for security.
 
  * Launch the Google Developers Console <https://console.developers.google.com>
@@ -39,19 +39,20 @@ The API uses OAuth2 for security.
  * Click **Download JSON** for a ```Client ID for native application```
  * copy this file to src/main/resources/client_secrets.json.
 
-##Setup the environment##
-### Set the Application name ###
-Edit ```SecurityUtilities.java``` and change **APPLICATION_NAME**
+## Setup the environment
 
-### Via the command line ###
+### Set the Application name
+Edit `DoubleClickBidManagerFactory.java` and change **APPLICATION_NAME**
 
-1. Execute the following command:
+### Via the command line
 
-    ```
-    $ mvn compile
-    ```
+Execute the following command:
 
-### Via Eclipse ###
+```
+$ mvn compile
+```
+
+### Via Eclipse
 
 1. Setup Eclipse preferences:
     1. Window > Preferences .. (or on Mac, Eclipse > Preferences)
@@ -77,3 +78,4 @@ Once you've checked out the code:
         ```
     2. Via eclipse, right-click on the project and select Run As > Java
     Application
+

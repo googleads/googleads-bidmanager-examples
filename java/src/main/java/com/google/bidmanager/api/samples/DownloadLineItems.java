@@ -14,40 +14,44 @@
 
 package com.google.bidmanager.api.samples;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.api.services.doubleclickbidmanager.DoubleClickBidManager;
 import com.google.api.services.doubleclickbidmanager.model.DownloadLineItemsRequest;
 import com.google.api.services.doubleclickbidmanager.model.DownloadLineItemsResponse;
-import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import java.io.File;
 
 /**
- * In DoubleClick Bid Manager, line items bid on impressions and deliver ads 
- * through exchanges and networks.  Once your line items are setup in the UI,
- * you can use the API to download a filtered list of line items to a csv file
- * which can then be modified and re-uploaded using UploadLineItems.
+ * In DoubleClick Bid Manager, line items bid on impressions and deliver ads through exchanges and
+ * networks. Once your line items are setup in the UI, you can use the API to download a filtered
+ * list of line items to a CSV file which can then be modified and re-uploaded via UploadLineItems.
  */
 public class DownloadLineItems {
   public static void main(String[] args) throws Exception {
     // Get an authenticated connection to the API.
-    DoubleClickBidManager service = SecurityUtilities.getAPIService();
-    
+    DoubleClickBidManager service = DoubleClickBidManagerFactory.getInstance();
+
     // Setup any filtering on the API request
     DownloadLineItemsRequest dliRequest = new DownloadLineItemsRequest();
-    /* If your download requests times out you may need to filter to reduce the
-     * number of items returned - the commented code below filters on 
-     * ADVERTISER_ID, refer to the reference guide at 
-     * https://developers.google.com/bid-manager/ for other options. 
-     */    
-      // .setFilterType("ADVERTISER_ID")
-      // .setFilterIds(Arrays.asList(0L, 1L, 2L));
+
+    /**
+     * If your download requests times out you may need to filter to reduce the number of items
+     * returned - the commented code below filters on ADVERTISER_ID, refer to the reference guide at
+     * https://developers.google.com/bid-manager/ for other options.
+     */
+    // .setFilterType("ADVERTISER_ID")
+    // .setFilterIds(Arrays.asList(0L, 1L, 2L));
 
     // Call the API, getting the (filtered) list of line items.
     DownloadLineItemsResponse dliResponse =
         service.lineitems().downloadlineitems(dliRequest).execute();
-    File to = new File("line_items.csv");
-    Files.write(dliResponse.getLineItems(), to, Charsets.UTF_8);
+
+    // Write the line items to a file.
+    File output = new File("line_items.csv");
+    Files.write(dliResponse.getLineItems(), output, UTF_8);
+
     System.out.println("Download complete.");
   }
 }
