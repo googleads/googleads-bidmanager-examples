@@ -30,21 +30,15 @@ from contextlib import closing
 from datetime import datetime
 from datetime import timedelta
 import os
-import urllib2
+import sys
+from six.moves.urllib.request import urlopen
 import util
 
 
 # Optional filtering arguments.
-parser = argparse.ArgumentParser(description='Downloads a report if it has '
-                                 'been created in the given timeframe.')
-parser.add_argument('--client_id', required=False,
-                    help=('Your client ID from the Google Developers Console.'
-                          'This should be provided along with the '
-                          'client_secret the first time you run an example.'))
-parser.add_argument('--client_secret', required=False,
-                    help=('Your client secret from the Google Developers '
-                          'Console. This should be provided along with the '
-                          'client_id the first time you run an example.'))
+parser = argparse.ArgumentParser(
+    add_help=False, description='Downloads a report if it has been created in '
+                                'the given timeframe.')
 parser.add_argument('--output_directory', default=(os.path.dirname(
     os.path.realpath(__file__))), help=('Path to the directory you want to '
                                         'save the report to.'))
@@ -71,25 +65,25 @@ def main(doubleclick_bid_manager, output_dir, query_id, report_window):
         report_url = query['metadata']['googleCloudStoragePathForLatestReport']
         output_file = '%s/%s.csv' % (output_dir, query['queryId'])
         with open(output_file, 'wb') as output:
-          with closing(urllib2.urlopen(report_url)) as url:
+          with closing(urlopen(report_url)) as url:
             output.write(url.read())
-        print 'Download complete.'
+        print('Download complete.')
       else:
         print('No reports for queryId "%s" in the last %s hours.' %
               (query['queryId'], report_window))
     except KeyError:
-      print 'No report found for queryId "%s".' % query_id
+      print('No report found for queryId "%s".' % query_id)
   else:
     # Call the API, getting a list of queries.
     response = doubleclick_bid_manager.queries().listqueries().execute()
 
     # Print queries out.
-    print 'Id\t\tName'
+    print('Id\t\tName')
     if 'queries' in response:
       for q in response['queries']:
-        print '%s\t%s' % (q['queryId'], q['metadata']['title'])
+        print('%s\t%s' % (q['queryId'], q['metadata']['title']))
     else:
-      print 'No queries exist.'
+      print('No queries exist.')
 
 
 def is_in_report_window(run_time_ms, report_window):
@@ -108,7 +102,7 @@ def is_in_report_window(run_time_ms, report_window):
 
 
 if __name__ == '__main__':
-  args = parser.parse_args()
+  args = util.get_arguments(sys.argv, __doc__, parents=[parser])
   # Retrieve the query id of the report we're downloading, or set to 0.
   QUERY_ID = args.query_id
   if not QUERY_ID:
@@ -118,7 +112,4 @@ if __name__ == '__main__':
     except ValueError:
       QUERY_ID = 0
 
-  main(util.get_service(
-      client_id=args.client_id, client_secret=args.client_secret),
-       args.output_directory, QUERY_ID, args.report_window)
-
+  main(util.setup(args), args.output_directory, QUERY_ID, args.report_window)

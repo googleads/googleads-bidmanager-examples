@@ -27,13 +27,14 @@ initial testing.
 
 import argparse
 import os
+import sys
 import util
 
 
 # Optional filtering arguments.
-parser = argparse.ArgumentParser(description='Upload line items from the '
-                                 'given file path with the authenticated '
-                                 'account.')
+parser = argparse.ArgumentParser(
+    add_help=False, description='Upload line items from the given file path '
+                                'with the authenticated account.')
 parser.add_argument('--file_path', required=False,
                     default=('%s/line_items.csv' % os.path.dirname(
                         os.path.realpath(__file__))),
@@ -42,14 +43,6 @@ parser.add_argument('--dry_run', default=True, type=bool,
                     help=('A boolean indicating whether running this sample '
                           'will make changes. No changes will occur if this '
                           'is set True.'))
-parser.add_argument('--client_id', required=False,
-                    help=('Your client ID from the Google Developers Console.'
-                          'This should be provided along with the '
-                          'client_secret the first time you run an example.'))
-parser.add_argument('--client_secret', required=False,
-                    help=('Your client secret from the Google Developers '
-                          'Console. This should be provided along with the '
-                          'client_id the first time you run an example.'))
 
 
 def main(doubleclick_bid_manager, body):
@@ -59,26 +52,24 @@ def main(doubleclick_bid_manager, body):
 
   if 'uploadStatus' in response and 'errors' in response['uploadStatus']:
     for error in response['uploadStatus']['errors']:
-      print error
+      print(error)
   else:
-    print 'Upload Successful.'
+    print('Upload Successful.')
 
 
 if __name__ == '__main__':
-  args = parser.parse_args()
+  args = util.get_arguments(sys.argv, __doc__, parents=[parser])
 
   file_path = args.file_path
   if not os.path.isabs(file_path):
     file_path = os.path.expanduser(file_path)
 
   with open(file_path, 'rb') as handle:
-    line_items = handle.read()
+    line_items = handle.read().decode('utf-8')
 
   BODY = {
       'dryRun': args.dry_run,
       'lineItems': line_items
   }
 
-  main(util.get_service(
-      client_id=args.client_id, client_secret=args.client_secret), BODY)
-
+  main(util.setup(args), BODY)

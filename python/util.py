@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2015 Google Inc. All Rights Reserved.
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,153 +14,117 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Common utilities used by the DoubleClick Bid Manager REST API Samples."""
+"""Handles common tasks across all API samples."""
 
-import datetime
+import argparse
 import os
-import sys
 
-from googleapiclient.discovery import build
+from googleapiclient import discovery
 import httplib2
 from oauth2client import client
-import yaml
+from oauth2client import file as oauthFile
+from oauth2client import tools
 
 
-# Update these with the values for your client id and client secret found in
-# the Google Developers Console.
-_CLIENT_ID = 'INSERT_CLIENT_ID_HERE'
-_CLIENT_SECRET = 'INSERT_CLIENT_SECRET'
-# Default path to dbm_sample.yaml, containing authorization credentials.
-_DEFAULT_AUTH_PATH = os.path.join(os.path.expanduser('~'), 'dbm_sample.yaml')
-# The web address for generating OAuth 2.0 credentials at Google.
-_GOOGLE_OAUTH2_ENDPOINT = 'https://accounts.google.com/o/oauth2/token'
-# DoubleClick Bid Manager REST API authorization scope.
-_SCOPE = 'https://www.googleapis.com/auth/doubleclickbidmanager'
-_USER_AGENT = 'DBM Python Sample'
-_VERSION = 'v1'  # Version of the DoubleClick Bid Manager REST API to use.
+API_NAME = 'doubleclickbidmanager'
+API_VERSION = 'v1'
+API_SCOPES = ['https://www.googleapis.com/auth/doubleclickbidmanager']
+
+# Filename used for the credential store.
+CREDENTIAL_STORE_FILE = API_NAME + '.dat'
 
 
-def _get_credentials(path, client_id=None, client_secret=None):
-  """Retrieve the OAuth2Credentials used for making API requests.
-
-  This will step through the authentication flow the first time it is called
-  and save credentials to the dbm_sample.yaml file in your home directory. In
-  subsequent runs, it will use the credentials saved to this file
-  automatically unless a different path is specified.
+def get_arguments(argv, desc, parents=None):
+  """Validates and parses command line arguments.
 
   Args:
-    path: str path to the file used for storing authentication data.
-    client_id: str containing your client ID.
-    client_secret: str containing your client secret.
+    argv: list of strings, the command-line parameters of the application.
+    desc: string, a description of the sample being executed.
+    parents: list of argparse.ArgumentParser, additional command-line parsers.
 
   Returns:
-    An OAuth2Credentials instance.
+    The parsed command-line arguments.
+  """
+  # Include the default oauth2client argparser
+  parent_parsers = [tools.argparser]
+
+  if parents:
+    parent_parsers.extend(parents)
+
+  parser = argparse.ArgumentParser(
+      description=desc,
+      formatter_class=argparse.RawDescriptionHelpFormatter,
+      parents=parent_parsers)
+  return parser.parse_args(argv[1:])
+
+
+def load_application_default_credentials():
+  """Atempts to load application default credentials.
+
+  Returns:
+    A credential object initialized with application default credentials or None
+    if none were found.
   """
   try:
-    auth_data = _load_auth_yaml(path)
-    credentials = client.OAuth2Credentials(
-        None, auth_data['client_id'], auth_data['client_secret'],
-        auth_data['refresh_token'], datetime.datetime(1983, 7, 14, 12),
-        _GOOGLE_OAUTH2_ENDPOINT,
-        _USER_AGENT)
-  except IOError:
-    print 'Failed to retrieve credentials, stepping through OAuth2 flow.'
-    credentials = _handle_oauth2_flow(client_id, client_secret)
-    _save_auth_yaml(path, credentials)
+    credentials = client.GoogleCredentials.get_application_default()
+    return credentials.create_scoped(API_SCOPES)
+  except client.ApplicationDefaultCredentialsError:
+    # No application default credentials, continue to try other options.
+    pass
+
+
+def load_user_credentials(client_secrets, storage, flags):
+  """Attempts to load user credentials from the provided client secrets file.
+
+  Args:
+    client_secrets: path to the file containing client secrets.
+    storage: the data store to use for caching credential information.
+    flags: command-line flags.
+
+  Returns:
+    A credential object initialized with user account credentials.
+  """
+  # Set up a Flow object to be used if we need to authenticate.
+  flow = client.flow_from_clientsecrets(
+      client_secrets,
+      scope=API_SCOPES,
+      message=tools.message_if_missing(client_secrets))
+
+  # Retrieve credentials from storage.
+  # If the credentials don't exist or are invalid run through the installed
+  # client flow. The storage object will ensure that if successful the good
+  # credentials will get written back to file.
+  credentials = storage.get()
+  if credentials is None or credentials.invalid:
+    credentials = tools.run_flow(flow, storage, flags)
+
   return credentials
 
 
-def _handle_oauth2_flow(client_id, client_secret):
-  """Handles the OAuth2 Installed Application Flow to get credentials.
+def setup(flags):
+  """Handles authentication and loading of the API.
 
   Args:
-    client_id: str containing your client ID.
-    client_secret: str containing your client secret.
+    flags: command-line flags obtained by calling ''get_arguments()''.
 
   Returns:
-    An OAuth2Credentials object used to authorize requests.
+    An initialized service object.
   """
-  flow = client.OAuth2WebServerFlow(
-      client_id=client_id, client_secret=client_secret,
-      scope=[_SCOPE], user_agent=_USER_AGENT,
-      redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+  # Load application default credentials if they're available.
+  credentials = load_application_default_credentials()
 
-  authorize_url = flow.step1_get_authorize_url()
+  # Otherwise, load credentials from the provided client secrets file.
+  if credentials is None:
+    # Name of a file containing the OAuth 2.0 information for this
+    # application, including client_id and client_secret, which are found
+    # on the Credentials tab on the Google Developers Console.
+    client_secrets = os.path.join(os.path.dirname(__file__),
+                                  'client_secrets.json')
+    storage = oauthFile.Storage(CREDENTIAL_STORE_FILE)
+    credentials = load_user_credentials(client_secrets, storage, flags)
 
-  print ('Log into the Google Account you use to access your DBM account'
-         'and go to the following URL: \n%s\n' % (authorize_url))
-  print 'After approving the token enter the verification code (if specified).'
-  code = raw_input('Code: ').strip()
+  # Authorize HTTP object with the prepared credentials.
+  http = credentials.authorize(http=httplib2.Http())
 
-  try:
-    credentials = flow.step2_exchange(code)
-  except client.FlowExchangeError, e:
-    print 'Authentication has failed: %s' % e
-    sys.exit(1)
-  else:
-    return credentials
-
-
-def _load_auth_yaml(path):
-  """Load credentials from file at the specified path.
-
-  Args:
-    path: A str path to the file containing OAuth2 credentials.
-
-  Returns:
-    A dictionary mapping of the OAuth2 credentials.
-  """
-  if not os.path.isabs(path):
-    path = os.path.expanduser(path)
-  with open(path, 'rb') as handle:
-    auth_data = yaml.load(handle.read())
-    print 'Loaded credentials from "%s".' % path
-    return auth_data
-
-
-def _save_auth_yaml(path, credentials):
-  """Save credentials to the file at the specified path.
-
-  Args:
-    path: str path to the file being saved.
-    credentials: OAuth2Credentials object received after authorizing.
-  """
-  if not os.path.isabs(path):
-    path = os.path.expanduser(path)
-  with open(path, 'wb') as handle:
-    handle.write(yaml.dump({
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'refresh_token': credentials.refresh_token}))
-  print 'Saved credentials to "%s".' % path
-
-
-def get_service(path=_DEFAULT_AUTH_PATH, client_id=None, client_secret=None):
-  """Utility function for retrieving the service used to call the DBM REST API.
-
-  Args:
-    path: str path to the file containing OAuth2 credentials.
-    client_id: str containing your client ID.
-    client_secret: str containing your client secret.
-
-  Raises:
-    ValueError: If no client id / secret are provided via command line or set
-                in this file.
-
-  Returns:
-      A service for interacting with the DoubleClick Bid Manager REST API.
-  """
-  if path or (client_id and client_secret):
-    credentials = _get_credentials(path, client_id, client_secret)
-  else:
-    if (_CLIENT_ID == 'INSERT_CLIENT_ID_HERE'
-        or _CLIENT_SECRET == 'INSERT_CLIENT_SECRET'):
-      raise ValueError('You must set the CLIENT_ID and CLIENT_SECRET to'
-                       'complete the OAuth2 flow.')
-    else:
-      credentials = _get_credentials(_DEFAULT_AUTH_PATH, _CLIENT_ID,
-                                     _CLIENT_SECRET)
-
-  return build('doubleclickbidmanager', _VERSION,
-               http=credentials.authorize(httplib2.Http()))
-
+  # Construct and return a service object via the discovery service.
+  return discovery.build(API_NAME, API_VERSION, http=http)

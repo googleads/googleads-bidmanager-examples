@@ -1,60 +1,38 @@
-DoubleClick Bid Manager REST API Python Samples
-=======================================================
+# DoubleClick Bid Manager REST API Python Samples
+
 These samples demonstrate basic usage of the
 [DoubleClick Bid Manager REST API](https://developers.google.com/bid-manager/).
 
-Setup
-=======================================================
-To run these samples, you'll need to do the following:
+## Prerequisites
 
-1. Download and install the **Google API Python Client** with either
-   easy_install or pip:
+Please make sure that you're running Python 2.7+ or 3.4+ and have pip installed. Use the following command from the samples directory to install all dependencies:
 
-  * Using easy_install:
-
-      ```
-      $ easy_install --upgrade google-api-python-client
-      ```
-
-  * Using pip:
-
-      ```
-      $ pip install --upgrade google-api-python-client
-      ```
-
-2. If you haven't done so already, contact your Google Technical Account
-  Manager to ensure you are configured to use the DoubleClick Bid Manager REST
-  API.
-3. Go to the [Google Developers Console](https://console.developers.google.com/)
-  and click the `APIs & auth` and then the `Credentials` tab.
-4. If you don't see any rows under `OAuth 2.0 client IDs`, you should create
-  one now by clicking the `Add credentials` button and selecting
-  `OAuth 2.0 client ID` from the drop-down menu. Select `Other` as your
-  Application type and click the `Create` button.
-5. On the `Credentials` page, click one of your clients under
-  `OAuth 2.0 client IDs` and view the corresponding `Client Id` and
-  `Client secret`.
-6. You will only need to authorize once to run these samples. You can either
-  open **util.py** and manually enter the `CLIENT_ID` and `CLIENT_SECRET`
-  fields or you may provide them as command line arguments when running one
-  of the samples. By default, your credentials will be saved to
-  **dbm_sample.yaml** in your home directory.
-9. Before attempting to run any of the samples, you should update any fields
-  containing a template value.
-
-You should now be able to start any of the samples by running them from the
-command line. You will need to provide your client id and client secret the
-first time you run one of the samples either by setting it in the util.py or
-providing them as command line arguments to the example you're trying to run.
-For example:
-
-```
-$ python download_line_items.py --client_id="$CLIENT_ID" --client_secret="$CLIENT_SECRET"
+```Batchfile
+$ pip install -r dependencies.txt
 ```
 
-For a listing of available command line arguments for a given example, provide
-the `--help` argument. For example:
+## Setup Authentication
 
-```
-$ python download_line_items.py --help
-```
+This API uses OAuth 2.0. Learn more about Google APIs and OAuth 2.0 here:
+https://developers.google.com/accounts/docs/OAuth2
+
+Or, if you'd like to dive right in, follow these steps.
+ - Visit https://console.developers.google.com to register your application.
+ - From the API Manager -> Google APIs screen, activate access to "DoubleClick Bid Manager API".
+ - Click on "Credentials" in the left navigation menu
+ - Click the button labeled "Create credentials" and select "OAuth Client ID"
+ - Select "Other" as the "Application type", then "Create"
+ - From the Credentials page, click "Download JSON" next to the client ID you just created and save the file as `client_secrets.json` in the samples project directory.
+
+## Running the Examples
+
+I'm assuming you've checked out the code and are reading this from a local
+directory. If not check out the code to a local directory.
+
+1. Start up a sample, e.g.
+
+        $ python get_latest_report.py
+
+2. Complete the authorization steps on your browser.
+
+3. Examine your shell output, be inspired and start hacking an amazing new app!
