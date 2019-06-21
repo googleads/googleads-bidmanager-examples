@@ -55,7 +55,7 @@ class DownloadLineItems extends BaseExample {
       return;
     }
 
-    if (!isset($result['lineItems']) || count($result['lineItems']) < 1) {
+    if (empty($result['lineItems'])) {
       print '<p>No items found</p>';
       return;
     } else {
