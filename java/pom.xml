@@ -26,7 +26,7 @@
    <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-doubleclickbidmanager</artifactId>
-      <version>v1-rev48-1.22.0</version>
+      <version>v1.1-rev1-1.25.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.http-client</groupId>
@@ -40,8 +40,8 @@
     </dependency>
   </dependencies>
   <properties>
-    <project.http.version>1.22.0</project.http.version>
-    <project.oauth.version>1.22.0</project.oauth.version>
+    <project.http.version>1.25.0</project.http.version>
+    <project.oauth.version>1.25.0</project.oauth.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>

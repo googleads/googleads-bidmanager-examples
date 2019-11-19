@@ -21,7 +21,6 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.services.doubleclickbidmanager.DoubleClickBidManager;
 import com.google.api.services.doubleclickbidmanager.model.ListQueriesResponse;
 import com.google.api.services.doubleclickbidmanager.model.Query;
-
 import com.google.common.base.Strings;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
@@ -53,11 +52,20 @@ public class GetLatestReport {
     if (queryId == 0) {
       // Call the API, getting a list of queries.
       ListQueriesResponse queryListResponse = service.queries().listqueries().execute();
-
       // Print them out.
       System.out.println("Id\t\tName");
-      for (Query query : queryListResponse.getQueries()) {
-        System.out.format("%s\t%s%n", query.getQueryId(), query.getMetadata().getTitle());
+      // Starting with the first page.
+      printQueries(queryListResponse);
+      // Then all other pages.
+      while (queryListResponse.getNextPageToken() != null
+          && !queryListResponse.getNextPageToken().isEmpty()) {
+        queryListResponse =
+            service
+                .queries()
+                .listqueries()
+                .setPageToken(queryListResponse.getNextPageToken())
+                .execute();
+        printQueries(queryListResponse);
       }
     } else {
       // Call the API, getting the latest status for the passed queryId.
@@ -78,8 +86,14 @@ public class GetLatestReport {
 
         System.out.println("Download complete.");
       } else {
-        System.out.format("No reports for query Id %s in the last 12 hours.",  queryId);
+        System.out.format("No reports for query Id %s in the last 12 hours.", queryId);
       }
+    }
+  }
+
+  private static void printQueries(ListQueriesResponse queryListResponse) {
+    for (Query query : queryListResponse.getQueries()) {
+      System.out.format("%s\t%s%n", query.getQueryId(), query.getMetadata().getTitle());
     }
   }
 
@@ -95,7 +109,7 @@ public class GetLatestReport {
   }
 
   private static String readInputLine() throws IOException {
-    try(BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
+    try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
       return in.readLine();
     }
   }

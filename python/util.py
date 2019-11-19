@@ -27,7 +27,7 @@ from oauth2client import tools
 
 
 API_NAME = 'doubleclickbidmanager'
-API_VERSION = 'v1'
+API_VERSION = 'v1.1'
 API_SCOPES = ['https://www.googleapis.com/auth/doubleclickbidmanager']
 
 # Filename used for the credential store.
@@ -59,7 +59,7 @@ def get_arguments(argv, desc, parents=None):
 
 
 def load_application_default_credentials():
-  """Atempts to load application default credentials.
+  """Attempts to load application default credentials.
 
   Returns:
     A credential object initialized with application default credentials or None

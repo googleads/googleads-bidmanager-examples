@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """This example demonstrates how to retrieve the latest report.
 
 DBM users typically create scheduled reports, where the advertiser user either
@@ -34,26 +33,34 @@ import sys
 from six.moves.urllib.request import urlopen
 import util
 
-
 # Optional filtering arguments.
 parser = argparse.ArgumentParser(
-    add_help=False, description='Downloads a report if it has been created in '
-                                'the given timeframe.')
-parser.add_argument('--output_directory', default=(os.path.dirname(
-    os.path.realpath(__file__))), help=('Path to the directory you want to '
-                                        'save the report to.'))
-parser.add_argument('--query_id', default=0, type=int,
-                    help=('The id of a query used to generate a report.'))
-parser.add_argument('--report_window', default=12, type=int,
-                    help=('The age a report must be in hours at a maximum to '
-                          'be considered fresh.'))
+    add_help=False,
+    description='Downloads a report if it has been created in '
+    'the given timeframe.')
+parser.add_argument(
+    '--output_directory',
+    default=(os.path.dirname(os.path.realpath(__file__))),
+    help=('Path to the directory you want to '
+          'save the report to.'))
+parser.add_argument(
+    '--query_id',
+    default=0,
+    type=int,
+    help=('The id of a query used to generate a report.'))
+parser.add_argument(
+    '--report_window',
+    default=12,
+    type=int,
+    help=('The age a report must be in hours at a maximum to '
+          'be considered fresh.'))
 
 
 def main(doubleclick_bid_manager, output_dir, query_id, report_window):
   if query_id:
     # Call the API, getting the latest status for the passed queryId.
-    query = (doubleclick_bid_manager.queries().getquery(queryId=query_id)
-                .execute())
+    query = (
+        doubleclick_bid_manager.queries().getquery(queryId=query_id).execute())
     try:
       # If it is recent enough...
       if (is_in_report_window(query['metadata']['latestReportRunTimeMs'],
@@ -80,10 +87,20 @@ def main(doubleclick_bid_manager, output_dir, query_id, report_window):
     # Print queries out.
     print('Id\t\tName')
     if 'queries' in response:
-      for q in response['queries']:
-        print('%s\t%s' % (q['queryId'], q['metadata']['title']))
+      # Starting with the first page.
+      print_queries(response)
+      # Then everything else
+      while 'nextPageToken' in response and response['nextPageToken']:
+        response = doubleclick_bid_manager.queries().listqueries(
+            pageToken=response['nextPageToken']).execute()
+        print_queries(response)
     else:
       print('No queries exist.')
+
+
+def print_queries(response):
+  for q in response['queries']:
+    print('%s\t%s' % (q['queryId'], q['metadata']['title']))
 
 
 def is_in_report_window(run_time_ms, report_window):
@@ -92,11 +109,12 @@ def is_in_report_window(run_time_ms, report_window):
   Args:
     run_time_ms: str containing a time in milliseconds.
     report_window: int identifying the range of the report window in hours.
+
   Returns:
     A boolean indicating whether the given query's report run time is within
     the report window.
   """
-  report_time = datetime.fromtimestamp(int((run_time_ms))/1000)
+  report_time = datetime.fromtimestamp(int((run_time_ms)) / 1000)
   earliest_time_in_range = datetime.now() - timedelta(hours=report_window)
   return report_time > earliest_time_in_range
 
@@ -107,8 +125,9 @@ if __name__ == '__main__':
   QUERY_ID = args.query_id
   if not QUERY_ID:
     try:
-      QUERY_ID = int(raw_input('Enter the query id or press enter to '
-                               'list queries: '))
+      QUERY_ID = int(
+          raw_input('Enter the query id or press enter to '
+                    'list queries: '))
     except ValueError:
       QUERY_ID = 0
 

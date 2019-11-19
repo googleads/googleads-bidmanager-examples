@@ -39,6 +39,12 @@ class GetLatestReport extends BaseExample {
     ));
   }
 
+  protected function printQueries($queries) {
+    foreach ($queries as $query) {
+      printf('<p>%s %s</p>', $query->queryId, $query->metadata->title);
+    }
+  }
+
   /**
    * (non-PHPdoc)
    * @see BaseExample::run()
@@ -53,8 +59,12 @@ class GetLatestReport extends BaseExample {
       $result = $this->service->queries->listqueries();
       if (isset($result['queries']) && count($result['queries']) > 0) {
         print '<pre>';
-        foreach ($result['queries'] as $query) {
-          printf('<p>%s %s</p>', $query->queryId, $query->metadata->title);
+        $this->printQueries($result['queries']);
+        while (!is_null($result->nextPageToken)
+            && !empty($result->nextPageToken)) {
+          $result = $this->service->queries->listqueries(
+              array('pageToken' => $result->nextPageToken));
+          $this->printQueries($result['queries']);
         }
         print '</pre>';
       } else {

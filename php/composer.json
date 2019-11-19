@@ -1,5 +1,6 @@
 {
     "require": {
-        "google/apiclient": "^2.0"
+        "google/apiclient-services": "dev-master as 0.122",
+        "google/apiclient": "^2.4"
     }
 }
