@@ -1,0 +1,7 @@
+{
+  "require": {
+    "google/apiclient-services": "v0.251.0",
+    "google/apiclient": "^2.4",
+    "php": ">=7.2"
+  }
+}

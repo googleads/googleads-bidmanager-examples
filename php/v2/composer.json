@@ -1,0 +1,18 @@
+{
+  "name": "googleads/googleads-bidmanager-examples",
+  "author": "Google LLC",
+  "url": "https://github.com/googleads/googleads-bidmanager-examples",
+  "description": "Google Bid Manager API PHP code examples",
+  "require": {
+    "google/apiclient-services": "~0.258",
+    "google/apiclient": "^2.4",
+    "php": ">=7.2"
+  },
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Google",
+      "homepage": "https://github.com/googleads/googleads-bidmanager-examples/contributors"
+    }
+  ]
+}
